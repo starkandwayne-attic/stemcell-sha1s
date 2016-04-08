@@ -42,7 +42,19 @@ jobs:
   plan:
   - aggregate:
     - { get: aws-hvm-ubuntu, trigger: true }
+    - { get: aws-hvm-centos, trigger: true }
     - { get: aws-ubuntu, trigger: true }
+    - { get: aws-centos, trigger: true }
+#    - { get: azure-hyperv-ubuntu, trigger: true }
+#    - { get: azure-hyperv-centos, trigger: true }
+    - { get: openstack-kvm-ubuntu, trigger: true }
+    - { get: openstack-kvm-ubuntu-raw, trigger: true }
+    - { get: openstack-kvm-centos, trigger: true }
+    - { get: openstack-kvm-centos-raw, trigger: true }
+    - { get: vcloud-esxi-ubuntu, trigger: true }
+    - { get: vsphere-esxi-ubuntu, trigger: true }
+    - { get: vsphere-esxi-centos, trigger: true }
+    - { get: bosh-lite-ubuntu, trigger: true }
     - { get: git }
   - task: update
     config:
@@ -50,7 +62,23 @@ jobs:
       image_resource: (( grab meta.image ))
       inputs:
       - { name: git, path: git }
-      - { name: aws-hvm-ubuntu, path: stemcells/bosh-aws-xen-hvm-ubuntu-trusty-go_agent}
+      - { name: aws-ubuntu, path: stemcells/bosh-aws-xen-ubuntu-trusty-go_agent }
+      - { name: aws-centos, path: stemcells/bosh-aws-xen-centos-7-go_agent }
+      - { name: aws-hvm-ubuntu, path: stemcells/bosh-aws-xen-hvm-ubuntu-trusty-go_agent }
+      - { name: aws-hvm-centos, path: stemcells/bosh-aws-xen-hvm-centos-7-go_agent }
+#      - { name: azure-hyperv-ubuntu, path: stemcels/bosh-azure-hyperv-ubuntu-trusty-go_agent }
+#      - { name: azure-hyperv-centos, path: stemcels/bosh-azure-hyperv-centos-7-go_agent }
+      - { name: openstack-kvm-ubuntu, path: stemcells/bosh-openstack-kvm-ubuntu-trusty-go_agent }
+      - { name: openstack-kvm-ubuntu-raw, path: stemcells/bosh-openstack-kvm-ubuntu-trusty-go_agent-raw }
+      - { name: openstack-kvm-centos, path: stemcells/bosh-openstack-kvm-centos-7-go_agent }
+      - { name: openstack-kvm-centos-raw, path: stemcells/bosh-openstack-kvm-centos-7-go_agent-raw }
+      - { name: vcloud-esxi-ubuntu, path: stemcells/bosh-vcloud-esxi-ubuntu-trusty-go_agent }
+      - { name: vsphere-esxi-ubuntu, path: stemcells/bosh-vsphere-esxi-ubuntu-trusty-go_agent }
+      - { name: vsphere-esxi-centos, path: stemcells/bosh-vsphere-esxi-centos-7-go_agent }
+      - { name: bosh-lite-ubuntu, path: stemcells/bosh-warden-boshlite-ubuntu-trusty-go_agent }
+      outputs:
+      - name: gh
+      - name: pushme
       run:
         path: git/ci/scripts/update
         args: []
@@ -59,15 +87,16 @@ jobs:
         REPO_ROOT: git
         REPO_OUT: pushme
 
-  - put: git
-    params:
-      rebase: true
-      repository: pushme/git
-  - put: app
-    params:
-      manifest: pushme/git/manifest.yml
-      path: pushme/git/www
-      current_app_name: (( grab meta.cf.app ))
+  - aggregate:
+    - put: git
+      params:
+        rebase: true
+        repository: pushme/git
+    - put: app
+      params:
+        manifest: pushme/git/manifest.yml
+        path: pushme/git/www
+        current_app_name: (( grab meta.cf.app ))
 
 resource_types:
 - name: slack-notification
@@ -104,3 +133,61 @@ resources:
   check_every: 30m
   source:
     name: bosh-aws-xen-ubuntu-trusty-go_agent
+- name: aws-centos
+  type: bosh-io-stemcell
+  check_every: 30m
+  source:
+    name: bosh-aws-xen-centos-7-go_agent
+- name: aws-hvm-centos
+  type: bosh-io-stemcell
+  source:
+    name: bosh-aws-xen-hvm-centos-7-go_agent
+- name: azure-hyperv-ubuntu
+  type: bosh-io-stemcell
+  check_every: 30m
+  source:
+    name: bosh-azure-hyperv-ubuntu-trusty-go_agent
+- name: azure-hyperv-centos
+  type: bosh-io-stemcell
+  source:
+    name: bosh-azure-hyperv-centos-7-go_agent
+- name: openstack-kvm-ubuntu
+  type: bosh-io-stemcell
+  check_every: 30m
+  source:
+    name: bosh-openstack-kvm-ubuntu-trusty-go_agent
+- name: openstack-kvm-ubuntu-raw
+  type: bosh-io-stemcell
+  check_every: 30m
+  source:
+    name: bosh-openstack-kvm-ubuntu-trusty-go_agent-raw
+- name: openstack-kvm-centos
+  type: bosh-io-stemcell
+  check_every: 30m
+  source:
+    name: bosh-openstack-kvm-centos-7-go_agent
+- name: openstack-kvm-centos-raw
+  type: bosh-io-stemcell
+  check_every: 30m
+  source:
+    name: bosh-openstack-kvm-centos-7-go_agent-raw
+- name: vcloud-esxi-ubuntu
+  type: bosh-io-stemcell
+  check_every: 30m
+  source:
+    name: bosh-vcloud-esxi-ubuntu-trusty-go_agent
+- name: vsphere-esxi-ubuntu
+  type: bosh-io-stemcell
+  check_every: 30m
+  source:
+    name: bosh-vsphere-esxi-ubuntu-trusty-go_agent
+- name: vsphere-esxi-centos
+  type: bosh-io-stemcell
+  check_every: 30m
+  source:
+    name: bosh-vsphere-esxi-centos-7-go_agent
+- name: bosh-lite-ubuntu
+  type: bosh-io-stemcell
+  check_every: 30m
+  source:
+    name: bosh-warden-boshlite-ubuntu-trusty-go_agent
