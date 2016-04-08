@@ -6,14 +6,14 @@ for dir in stemcells/*; do
   stemcell=$(echo ${dir} | sed 's|stemcells/||')
   version=$(cat ${dir}/version)
   target_md5=$(curl https://bosh.io/api/v1/stemcells/${stemcell} | jq -r ". | map(select(.version == \"${version}\")) | .[].regular.md5")
-  actual_md5=$(md5sum stemcell/${stemcell}.tgz | cut -d " " -f1)
+  actual_md5=$(md5sum ${dir}/stemcell.tgz | cut -d " " -f1)
 
   if [[ "$actual_md5" != "${target_md5}" ]]; then
     echo "md5sum mismatch between what bosh.io says (${target_md5}, and what we calculated ${actual_md5}). Aborting."
     exit 1
   fi
 
-  sha1=$(shasum -a 1 stemcell/${stemcell}.tgz | cut -d " " -f1)
+  sha1=$(shasum -a 1 ${dir}/stemcell.tgz | cut -d " " -f1)
 
   mkdir -p ${REPO_ROOT}/www/${stemcell}
   echo ${sha1} > ${REPO_ROOT}/www/${stemcell}/${version}
