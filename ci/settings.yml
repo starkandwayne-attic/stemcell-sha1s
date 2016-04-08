@@ -1,8 +1,11 @@
 ---
 meta:
+  pipeline: stemcell-sha1s
+  target: sw
+
   cf:
     user: (( vault "secret/pipelines/stemcell-sha1s/cf:user" ))
-    pass: (( vault "secret/pipelines/stemcell-sha1s/cf:password" ))
+    pass: (( vault "secret/pipelines/stemcell-sha1s/cf:pass" ))
     org: (( vault "secret/pipelines/stemcell-sha1s/cf:org" ))
     space: (( vault "secret/pipelines/stemcell-sha1s/cf:space" ))
     app: (( vault "secret/pipelines/stemcell-sha1s/cf:app" ))

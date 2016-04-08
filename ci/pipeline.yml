@@ -16,6 +16,9 @@ meta:
     source:
       repository: starkandwayne/concourse
 
+  pipeline: (( param "Specify a name for this pipeline" ))
+  target:   (( param "Specify the concourse target" ))
+
   go:
     version: 1.5
 
@@ -28,7 +31,7 @@ meta:
 
 
 groups:
-- name: (( grab meta.name ))
+- name: (( grab meta.pipeline ))
   jobs:
   - update-sha1s
 
@@ -46,9 +49,9 @@ jobs:
       image_resource: (( grab meta.image ))
       inputs:
       - { name: git, path: git }
-      - { name: aws-hvm-ubuntu, path: stemcells/FIXME}
+      - { name: aws-hvm-ubuntu, path: stemcells/bosh-aws-xen-hvm-ubuntu-trusty-go_agent}
       run:
-        path: ci/scripts/update
+        path: git/ci/scripts/update
         args: []
       params:
         BRANCH: (( grab meta.github.branch ))

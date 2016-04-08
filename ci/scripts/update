@@ -1,6 +1,8 @@
 #!/bin/bash
 
 for dir in stemcells/*; do
+  echo ${dir}:
+  ls -la ${dir}
   stemcell=$(echo ${dir} | sed 's|stemcells/||')
   version=$(cat ${dir}/version)
   target_md5=$(curl https://bosh.io/api/v1/stemcells/${stemcell} | jq -r ". | map(select(.version == \"${version}\")) | .[].regular.md5")
