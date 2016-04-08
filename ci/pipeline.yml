@@ -42,6 +42,7 @@ jobs:
   plan:
   - aggregate:
     - { get: aws-hvm-ubuntu, trigger: true }
+    - { get: aws-ubuntu, trigger: true }
     - { get: git }
   - task: update
     config:
@@ -98,3 +99,8 @@ resources:
   check_every: 30m
   source:
     name: bosh-aws-xen-hvm-ubuntu-trusty-go_agent
+- name: aws-ubuntu
+  type: bosh-io-stemcell
+  check_every: 30m
+  source:
+    name: bosh-aws-xen-ubuntu-trusty-go_agent
