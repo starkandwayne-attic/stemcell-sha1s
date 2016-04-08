@@ -1,0 +1,95 @@
+---
+#
+# ci/pipeline.yml
+#
+
+meta:
+  cf:
+    user: (( param "Specify your CF user" ))
+    pass: (( param "Specify your CF passwd" ))
+    org:  (( param "Specify your CF org" ))
+    space: (( param "Specify your CF space" ))
+    app:   (( param "Specify your CF App" ))
+
+  image:
+    type: docker-image
+    source:
+      repository: starkandwayne/concourse
+
+  go:
+    version: 1.5
+
+  github:
+    uri:          (( concat "git@github.com:" meta.github.owner "/" meta.github.repo ))
+    owner:        starkandwayne
+    repo:         stemcell-sha1s
+    branch:       master
+    private_key:  (( param "Please generate an SSH Deployment Key for this repo and specify it here" ))
+
+
+groups:
+- name: (( grab meta.name ))
+  jobs:
+  - update-sha1s
+
+jobs:
+- name: update-sha1s
+  public: true
+  serial: true
+  plan:
+  - aggregate:
+    - { get: aws-hvm-ubuntu, trigger: true }
+    - { get: git }
+  - task: update
+    config:
+      platform: linux
+      image_resource: (( grab meta.image ))
+      inputs:
+      - { name: git, path: git }
+      - { name: aws-hvm-ubuntu, path: stemcells/FIXME}
+      run:
+        path: ci/scripts/update
+        args: []
+      params:
+        BRANCH: (( grab meta.github.branch ))
+        REPO_ROOT: git
+        REPO_OUT: pushme
+
+  - put: git
+    params:
+      rebase: true
+      repository: pushme/git
+  - put: app
+    params:
+      manifest: pushme/git/manifest.yml
+      path: pushme/git/www
+      current_app_name: (( grab meta.cf.app ))
+
+resource_types:
+- name: slack-notification
+  type: docker-image
+  source:
+    repository: cfcommunity/slack-notification-resource
+
+resources:
+- name: app
+  type: cf
+  source:
+    api:             https://api.run.pivotal.io
+    username:        (( grab meta.cf.user ))
+    password:        (( grab meta.cf.pass ))
+    organization:    (( grab meta.cf.org ))
+    space:           (( grab meta.cf.space ))
+    skip_cert_check: false
+
+- name: git
+  type: git
+  source:
+    uri:         (( grab meta.github.uri ))
+    branch:      (( grab meta.github.branch ))
+    private_key: (( grab meta.github.private_key ))
+
+- name: aws-hvm-ubuntu
+  type: bosh-io-stemcell
+  source:
+    name: bosh-aws-xen-hvm-ubuntu-trusty-go_agent

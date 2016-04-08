@@ -1,0 +1,7 @@
+*.swp
+*~
+*#
+#*
+tmp
+my*.yml
+**/.deploy.yml
