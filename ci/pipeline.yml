@@ -87,6 +87,7 @@ resources:
 
 - name: git
   type: git
+  check_every: 1m
   source:
     uri:         (( grab meta.github.uri ))
     branch:      (( grab meta.github.branch ))
@@ -94,5 +95,6 @@ resources:
 
 - name: aws-hvm-ubuntu
   type: bosh-io-stemcell
+  check_every: 30m
   source:
     name: bosh-aws-xen-hvm-ubuntu-trusty-go_agent
